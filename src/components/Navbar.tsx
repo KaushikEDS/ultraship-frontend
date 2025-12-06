@@ -11,7 +11,7 @@ function Navbar() {
       <nav className="navbar">
         <div className="navbar-container">
           <div className="navbar-logo">
-            <img src="/logo.svg" alt="UltraShip" className="logo-image" />
+            <img src="https://www.ultrashiptms.ai/logo.svg" alt="UltraShip" className="logo-image" />
           </div>
 
           <div className="navbar-menu">
