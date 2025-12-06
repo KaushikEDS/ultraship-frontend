@@ -12,6 +12,12 @@
   padding: 0.75rem 2rem;
 }
 
+.navbar-wrapper .p-menubar-root-list > .p-menuitem > .p-menuitem-link,
+.navbar-wrapper .p-menubar-root-list > .p-menuitem > .p-menuitem-link .p-menuitem-text,
+.navbar-wrapper .p-menubar-root-list > .p-menuitem > .p-menuitem-link .p-menuitem-icon {
+  color: #ffffff !important;
+}
+
 .navbar-logo {
   display: flex;
   align-items: center;
@@ -24,16 +30,26 @@
 }
 
 .navbar-wrapper .p-menubar-root-list > .p-menuitem > .p-menuitem-link {
-  color: white;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1rem;
 }
 
 .navbar-wrapper .p-menubar-root-list > .p-menuitem > .p-menuitem-link:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2) !important;
 }
 
 .navbar-wrapper .p-menubar-root-list > .p-menuitem.p-menuitem-active > .p-menuitem-link {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+.navbar-wrapper .p-menubar .p-menubar-root-list > .p-menuitem:not(.p-highlight):not(.p-disabled) > .p-menuitem-content:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+.navbar-wrapper .p-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-content:hover .p-menuitem-link,
+.navbar-wrapper .p-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-content:hover .p-menuitem-text,
+.navbar-wrapper .p-menubar .p-menubar-root-list > .p-menuitem > .p-menuitem-content:hover .p-menuitem-icon {
+  color: #ffffff !important;
 }
 
 .navbar-wrapper .p-submenu-list {
@@ -43,13 +59,36 @@
   margin-top: 0.25rem;
 }
 
-.navbar-wrapper .p-submenu-list .p-menuitem-link {
-  color: #333;
+.navbar-wrapper .p-submenu-list .p-menuitem .p-menuitem-link,
+.navbar-wrapper .p-submenu-list .p-menuitem .p-menuitem-text,
+.navbar-wrapper .p-submenu-list .p-menuitem .p-menuitem-link .p-menuitem-text,
+.navbar-wrapper .p-submenu-list .p-menuitem .p-menuitem-link .p-menuitem-icon {
+  color: #333 !important;
 }
 
-.navbar-wrapper .p-submenu-list .p-menuitem-link:hover {
-  background: #f0f0f0;
-  color: #667eea;
+.navbar-wrapper .p-submenu-list .p-menuitem .p-menuitem-link:hover {
+  background: #f0f0f0 !important;
+}
+
+.navbar-wrapper .p-submenu-list .p-menuitem .p-menuitem-link:hover .p-menuitem-text {
+  color: #667eea !important;
+}
+
+.navbar-wrapper .p-submenu-list .p-menuitem:not(.p-highlight):not(.p-disabled) > .p-menuitem-content:hover {
+  background: #f0f0f0 !important;
+}
+
+.navbar-wrapper .p-submenu-list .p-menuitem:not(.p-highlight):not(.p-disabled) > .p-menuitem-content:hover .p-menuitem-link {
+  color: #333333 !important;
+}
+
+.navbar-wrapper .p-submenu-list .p-menuitem:not(.p-highlight):not(.p-disabled) > .p-menuitem-content:hover .p-menuitem-text {
+  color: #667eea !important;
+}
+
+.navbar-wrapper .p-submenu-list .p-menuitem > .p-menuitem-content .p-menuitem-link,
+.navbar-wrapper .p-submenu-list .p-menuitem > .p-menuitem-content .p-menuitem-text {
+  color: #333333 !important;
 }
 
 .hamburger-btn {
@@ -155,4 +194,33 @@
 .submenu a {
   padding: 0.75rem 1rem 0.75rem 3rem;
   font-size: 0.9rem;
+}
+
+/* Force white color for main menu items - override PrimeReact theme */
+.navbar-wrapper.navbar-wrapper .p-menubar .p-menubar-root-list .p-menuitem .p-menuitem-link {
+  color: #ffffff !important;
+}
+
+.navbar-wrapper.navbar-wrapper .p-menubar .p-menubar-root-list .p-menuitem .p-menuitem-link .p-menuitem-text {
+  color: #ffffff !important;
+}
+
+.navbar-wrapper.navbar-wrapper .p-menubar .p-menubar-root-list .p-menuitem .p-menuitem-link .p-menuitem-icon {
+  color: #ffffff !important;
+}
+
+/* Force dark color for dropdown submenu items */
+.navbar-wrapper.navbar-wrapper .p-menubar .p-submenu-list .p-menuitem .p-menuitem-link {
+  color: #333333 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+}
+
+.navbar-wrapper.navbar-wrapper .p-menubar .p-submenu-list .p-menuitem .p-menuitem-link .p-menuitem-text {
+  color: #333333 !important;
+}
+
+.navbar-wrapper .p-submenu-list .p-menuitem .p-menuitem-link:focus {
+  outline: none !important;
+  box-shadow: none !important;
 }

@@ -19,7 +19,10 @@ function Navbar() {
     {
       label: "Home",
       icon: "pi pi-home",
-      command: () => navigate("/"),
+      command: (e) => {
+        e?.originalEvent?.preventDefault();
+        navigate("/");
+      },
     },
     {
       label: "Features",
@@ -27,22 +30,34 @@ function Navbar() {
       items: [
         {
           label: "Shipment Tracking",
-          command: () => navigate("/features/tracking"),
+          command: (e) => {
+            e?.originalEvent?.preventDefault();
+            navigate("/features/tracking");
+          },
         },
         {
           label: "Rate Management",
-          command: () => navigate("/features/rates"),
+          command: (e) => {
+            e?.originalEvent?.preventDefault();
+            navigate("/features/rates");
+          },
         },
         {
           label: "Analytics",
-          command: () => navigate("/features/analytics"),
+          command: (e) => {
+            e?.originalEvent?.preventDefault();
+            navigate("/features/analytics");
+          },
         },
       ],
     },
     {
       label: "Pricing",
       icon: "pi pi-dollar",
-      command: () => navigate("/pricing"),
+      command: (e) => {
+        e?.originalEvent?.preventDefault();
+        navigate("/pricing");
+      },
     },
     {
       label: "Resources",
@@ -50,27 +65,42 @@ function Navbar() {
       items: [
         {
           label: "Documentation",
-          command: () => navigate("/resources/docs"),
+          command: (e) => {
+            e?.originalEvent?.preventDefault();
+            navigate("/resources/docs");
+          },
         },
         {
           label: "API Guide",
-          command: () => navigate("/resources/api"),
+          command: (e) => {
+            e?.originalEvent?.preventDefault();
+            navigate("/resources/api");
+          },
         },
         {
           label: "Support",
-          command: () => navigate("/resources/support"),
+          command: (e) => {
+            e?.originalEvent?.preventDefault();
+            navigate("/resources/support");
+          },
         },
       ],
     },
     {
       label: "Employees",
       icon: "pi pi-users",
-      command: () => navigate("/"),
+      command: (e) => {
+        e?.originalEvent?.preventDefault();
+        navigate("/");
+      },
     },
     {
       label: "Contact",
       icon: "pi pi-envelope",
-      command: () => navigate("/contact"),
+      command: (e) => {
+        e?.originalEvent?.preventDefault();
+        navigate("/contact");
+      },
     },
   ];
 
