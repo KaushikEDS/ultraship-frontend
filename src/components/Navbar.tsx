@@ -1,54 +1,92 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Menubar } from "primereact/menubar";
 import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
+import { MenuItem } from "primereact/menuitem";
+import { Link, useNavigate } from "react-router-dom";
 import "./Navbar.css";
 
 function Navbar() {
   const [visible, setVisible] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const toggleSubmenu = (menu: string) => {
     setOpenSubmenu(openSubmenu === menu ? null : menu);
   };
 
+  const menuItems: MenuItem[] = [
+    {
+      label: "Home",
+      icon: "pi pi-home",
+      command: () => navigate("/"),
+    },
+    {
+      label: "Features",
+      icon: "pi pi-star",
+      items: [
+        {
+          label: "Shipment Tracking",
+          command: () => navigate("/features/tracking"),
+        },
+        {
+          label: "Rate Management",
+          command: () => navigate("/features/rates"),
+        },
+        {
+          label: "Analytics",
+          command: () => navigate("/features/analytics"),
+        },
+      ],
+    },
+    {
+      label: "Pricing",
+      icon: "pi pi-dollar",
+      command: () => navigate("/pricing"),
+    },
+    {
+      label: "Resources",
+      icon: "pi pi-book",
+      items: [
+        {
+          label: "Documentation",
+          command: () => navigate("/resources/docs"),
+        },
+        {
+          label: "API Guide",
+          command: () => navigate("/resources/api"),
+        },
+        {
+          label: "Support",
+          command: () => navigate("/resources/support"),
+        },
+      ],
+    },
+    {
+      label: "Employees",
+      icon: "pi pi-users",
+      command: () => navigate("/"),
+    },
+    {
+      label: "Contact",
+      icon: "pi pi-envelope",
+      command: () => navigate("/contact"),
+    },
+  ];
+
+  const start = (
+    <div className="navbar-logo">
+      <img src="https://www.ultrashiptms.ai/logo.svg" alt="UltraShip" className="logo-image" />
+    </div>
+  );
+
+  const end = <Button icon="pi pi-bars" onClick={() => setVisible(true)} className="hamburger-btn" text aria-label="Menu" />;
+
   return (
     <>
-      <nav className="navbar">
-        <div className="navbar-container">
-          <div className="navbar-logo">
-            <img src="https://www.ultrashiptms.ai/logo.svg" alt="UltraShip" className="logo-image" />
-          </div>
-
-          <div className="navbar-menu">
-            <Link to="/">Home</Link>
-
-            <div className="menu-item-with-dropdown">
-              <Link to="/features">Features</Link>
-              <div className="dropdown">
-                <a href="#tracking">Shipment Tracking</a>
-                <a href="#rates">Rate Management</a>
-                <a href="#analytics">Analytics</a>
-              </div>
-            </div>
-
-            <Link to="/pricing">Pricing</Link>
-
-            <div className="menu-item-with-dropdown">
-              <Link to="/resources">Resources</Link>
-              <div className="dropdown">
-                <a href="#docs">Documentation</a>
-                <a href="#api">API Guide</a>
-                <a href="#support">Support</a>
-              </div>
-            </div>
-
-            <Link to="/contact">Contact</Link>
-          </div>
-
-          <Button icon="pi pi-bars" onClick={() => setVisible(true)} className="hamburger-btn" text aria-label="Menu" />
-        </div>
-      </nav>
+      <div className="navbar-wrapper">
+        <Menubar model={menuItems} start={start} end={end} />
+      </div>
 
       <Sidebar visible={visible} onHide={() => setVisible(false)} position="right">
         <h2>Menu</h2>
@@ -71,19 +109,19 @@ function Navbar() {
             {openSubmenu === "features" && (
               <ul className="submenu">
                 <li>
-                  <a href="#tracking" onClick={() => setVisible(false)}>
+                  <Link to="/features/tracking" onClick={() => setVisible(false)}>
                     Shipment Tracking
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#rates" onClick={() => setVisible(false)}>
+                  <Link to="/features/rates" onClick={() => setVisible(false)}>
                     Rate Management
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#analytics" onClick={() => setVisible(false)}>
+                  <Link to="/features/analytics" onClick={() => setVisible(false)}>
                     Analytics
-                  </a>
+                  </Link>
                 </li>
               </ul>
             )}
@@ -107,22 +145,29 @@ function Navbar() {
             {openSubmenu === "resources" && (
               <ul className="submenu">
                 <li>
-                  <a href="#docs" onClick={() => setVisible(false)}>
+                  <Link to="/resources/docs" onClick={() => setVisible(false)}>
                     Documentation
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#api" onClick={() => setVisible(false)}>
+                  <Link to="/resources/api" onClick={() => setVisible(false)}>
                     API Guide
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#support" onClick={() => setVisible(false)}>
+                  <Link to="/resources/support" onClick={() => setVisible(false)}>
                     Support
-                  </a>
+                  </Link>
                 </li>
               </ul>
             )}
+          </li>
+
+          <li>
+            <Link to="/" onClick={() => setVisible(false)}>
+              <i className="pi pi-users"></i>
+              Employees
+            </Link>
           </li>
 
           <li>
