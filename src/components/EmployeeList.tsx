@@ -85,7 +85,7 @@ function EmployeeList() {
         loading={loading}
         paginator
         rows={10}
-        onRowClick={(e) => openDetail(e.data)}
+        onRowClick={(e) => openDetail(e.data as Employee)}
         className="employee-table"
         selectionMode="single"
         dataKey="id"
