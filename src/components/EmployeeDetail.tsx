@@ -1,4 +1,5 @@
 import { Dialog } from "primereact/dialog";
+import { Chip } from "primereact/chip";
 import { Employee } from "../types/Employee";
 import "./EmployeeDetail.css";
 
@@ -6,10 +7,43 @@ interface EmployeeDetailProps {
   employee: Employee | null;
   visible: boolean;
   onHide: () => void;
+  onUpdate?: () => void;
 }
 
 function EmployeeDetail({ employee, visible, onHide }: EmployeeDetailProps) {
   if (!employee) return null;
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const renderAttendance = () => {
+    const attendanceEntries = Object.entries(employee.attendance || {});
+
+    if (attendanceEntries.length === 0) {
+      return <span className="no-data">No attendance records</span>;
+    }
+
+    return (
+      <div className="attendance-grid">
+        {attendanceEntries.map(([date, present]) => (
+          <div key={date} className={`attendance-item ${present ? "present" : "absent"}`}>
+            <span className="date">{date}</span>
+            <span className="status">
+              <i className={`pi ${present ? "pi-check" : "pi-times"}`}></i>
+              {present ? "Present" : "Absent"}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <Dialog header={employee.name} visible={visible} onHide={onHide} style={{ width: "50vw" }} breakpoints={{ "960px": "75vw", "641px": "90vw" }}>
@@ -24,76 +58,50 @@ function EmployeeDetail({ employee, visible, onHide }: EmployeeDetailProps) {
               <span>{employee.name}</span>
             </div>
             <div className="detail-item">
-              <label>Username</label>
-              <span>{employee.username}</span>
+              <label>Age</label>
+              <span>{employee.age} years old</span>
+            </div>
+            <div className="detail-item">
+              <label>Class</label>
+              <span>{employee.class}</span>
             </div>
             <div className="detail-item">
               <label>ID</label>
-              <span>{employee.id}</span>
+              <span>#{employee.id}</span>
             </div>
           </div>
         </div>
 
         <div className="detail-section">
           <h3>
-            <i className="pi pi-phone"></i> Contact Information
+            <i className="pi pi-book"></i> Subjects
           </h3>
-          <div className="detail-grid">
-            <div className="detail-item">
-              <label>Email</label>
-              <span>{employee.email}</span>
-            </div>
-            <div className="detail-item">
-              <label>Phone</label>
-              <span>{employee.phone}</span>
-            </div>
-            <div className="detail-item">
-              <label>Website</label>
-              <span>{employee.website}</span>
-            </div>
+          <div className="subjects-list">
+            {employee.subjects.map((subject, index) => (
+              <Chip key={index} label={subject} className="subject-chip" />
+            ))}
           </div>
         </div>
 
         <div className="detail-section">
           <h3>
-            <i className="pi pi-building"></i> Company
+            <i className="pi pi-calendar"></i> Attendance Records
           </h3>
-          <div className="detail-grid">
-            <div className="detail-item">
-              <label>Company Name</label>
-              <span>{employee.company.name}</span>
-            </div>
-            <div className="detail-item">
-              <label>Catch Phrase</label>
-              <span>{employee.company.catchPhrase}</span>
-            </div>
-            <div className="detail-item full-width">
-              <label>Business</label>
-              <span>{employee.company.bs}</span>
-            </div>
-          </div>
+          {renderAttendance()}
         </div>
 
         <div className="detail-section">
           <h3>
-            <i className="pi pi-map-marker"></i> Address
+            <i className="pi pi-clock"></i> Record Information
           </h3>
           <div className="detail-grid">
             <div className="detail-item">
-              <label>Street</label>
-              <span>{employee.address.street}</span>
+              <label>Created At</label>
+              <span>{formatDate(employee.createdAt)}</span>
             </div>
             <div className="detail-item">
-              <label>Suite</label>
-              <span>{employee.address.suite}</span>
-            </div>
-            <div className="detail-item">
-              <label>City</label>
-              <span>{employee.address.city}</span>
-            </div>
-            <div className="detail-item">
-              <label>Zipcode</label>
-              <span>{employee.address.zipcode}</span>
+              <label>Last Updated</label>
+              <span>{formatDate(employee.updatedAt)}</span>
             </div>
           </div>
         </div>

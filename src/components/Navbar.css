@@ -91,6 +91,53 @@
   color: #333333 !important;
 }
 
+.navbar-end {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50px;
+}
+
+.user-avatar {
+  background: white;
+  color: #667eea;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.user-details .username {
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.user-details .user-role {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.logout-btn {
+  color: white !important;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
 .hamburger-btn {
   color: white;
 }
@@ -98,6 +145,16 @@
 @media (min-width: 992px) {
   .hamburger-btn {
     display: none !important;
+  }
+  
+  .user-info {
+    display: flex;
+  }
+}
+
+@media (max-width: 991px) {
+  .user-info {
+    display: none;
   }
 }
 
