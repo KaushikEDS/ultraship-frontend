@@ -1,27 +1,16 @@
-import { useState, useRef, useEffect } from "react";
-import { useQuery, useMutation } from "@apollo/client/react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Menu } from "primereact/menu";
 import { Employee } from "../types/Employee";
-import { GET_EMPLOYEES_PAGINATED, DELETE_EMPLOYEE } from "../graphql/employee.queries";
+import { fetchEmployees } from "../services/employeeService";
 import { useAuth } from "../context/AuthContext";
 import EmployeeDetail from "./EmployeeDetail";
 import "./EmployeeList.css";
 
 type ViewMode = "grid" | "tile";
-
-interface EmployeesPaginatedData {
-  employeesPaginated: {
-    items: Employee[];
-    total: number;
-    hasMore: boolean;
-    currentPage: number;
-    totalPages: number;
-  };
-}
 
 function EmployeeList() {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -32,6 +21,8 @@ function EmployeeList() {
   const [sortField, setSortField] = useState<string>("name");
   const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("ASC");
   const [flaggedIds, setFlaggedIds] = useState<Set<number>>(new Set());
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState(true);
   const menuRefs = useRef<{ [key: number]: Menu | null }>({});
   const { isAdmin } = useAuth();
 
@@ -47,30 +38,46 @@ function EmployeeList() {
     }
   }, []);
 
-  const { data, loading, refetch } = useQuery<EmployeesPaginatedData>(GET_EMPLOYEES_PAGINATED, {
-    variables: {
-      pagination: {
-        limit: rows,
-        offset: first,
-        sortBy: sortField,
-        sortOrder: sortOrder,
-      },
-    },
-    fetchPolicy: "cache-and-network",
-  });
+  useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        setLoading(true);
+        const data = await fetchEmployees();
+        setAllEmployees(data);
+      } catch (error) {
+        console.error("Failed to fetch employees:", error);
+        alert("Failed to load employees. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadEmployees();
+  }, []);
 
-  const [deleteEmployee] = useMutation(DELETE_EMPLOYEE, {
-    onCompleted: () => {
-      refetch();
-    },
-    onError: (error: Error) => {
-      console.error("Delete error:", error);
-      alert("Failed to delete employee. You may not have permission.");
-    },
-  });
+  // Client-side sorting and pagination
+  const { employees, totalRecords } = useMemo(() => {
+    let sorted = [...allEmployees];
 
-  const employees = data?.employeesPaginated.items || [];
-  const totalRecords = data?.employeesPaginated.total || 0;
+    // Sort
+    sorted.sort((a, b) => {
+      let aValue: any = a[sortField as keyof Employee];
+      let bValue: any = b[sortField as keyof Employee];
+
+      if (typeof aValue === "string") {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+
+      if (aValue < bValue) return sortOrder === "ASC" ? -1 : 1;
+      if (aValue > bValue) return sortOrder === "ASC" ? 1 : -1;
+      return 0;
+    });
+
+    const total = sorted.length;
+    const paginated = sorted.slice(first, first + rows);
+
+    return { employees: paginated, totalRecords: total };
+  }, [allEmployees, sortField, sortOrder, first, rows]);
 
   const openDetail = (employee: Employee) => {
     setSelectedEmployee(employee);
@@ -84,11 +91,13 @@ function EmployeeList() {
 
   const handleDelete = async (employeeId: number) => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
-      try {
-        await deleteEmployee({ variables: { id: employeeId } });
-      } catch (error) {
-        console.error("Delete failed:", error);
-      }
+      // Remove from local state (jsonplaceholder doesn't support actual deletion)
+      setAllEmployees(allEmployees.filter((emp) => emp.id !== employeeId));
+      // Also remove from flagged list if present
+      const newFlaggedIds = new Set(flaggedIds);
+      newFlaggedIds.delete(employeeId);
+      setFlaggedIds(newFlaggedIds);
+      localStorage.setItem("flaggedEmployees", JSON.stringify(Array.from(newFlaggedIds)));
     }
   };
 
@@ -183,7 +192,6 @@ function EmployeeList() {
         value={employees}
         loading={loading}
         paginator
-        lazy
         first={first}
         rows={rows}
         totalRecords={totalRecords}
@@ -280,7 +288,7 @@ function EmployeeList() {
 
       <div className="employee-list-content">{viewMode === "grid" ? renderGridView() : renderTileView()}</div>
 
-      <EmployeeDetail employee={selectedEmployee} visible={detailVisible} onHide={closeDetail} onUpdate={() => refetch()} isAdmin={isAdmin} />
+      <EmployeeDetail employee={selectedEmployee} visible={detailVisible} onHide={closeDetail} />
     </div>
   );
 }
