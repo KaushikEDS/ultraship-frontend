@@ -115,6 +115,10 @@
   border-color: #667eea;
 }
 
+.employee-tile.flagged {
+  border-left: 4px solid #ff6b6b;
+}
+
 .tile-content {
   padding: 1rem;
 }

@@ -7,7 +7,6 @@ interface EmployeeDetailProps {
   employee: Employee | null;
   visible: boolean;
   onHide: () => void;
-  onUpdate?: () => void;
 }
 
 function EmployeeDetail({ employee, visible, onHide }: EmployeeDetailProps) {

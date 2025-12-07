@@ -54,6 +54,11 @@
   font-weight: 500;
 }
 
+.detail-item .p-inputtext,
+.detail-item .p-inputnumber {
+  width: 100%;
+}
+
 .subjects-list {
   display: flex;
   flex-wrap: wrap;

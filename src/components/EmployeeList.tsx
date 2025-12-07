@@ -1,11 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Menu } from "primereact/menu";
-import { InputText } from "primereact/inputtext";
 import { Employee } from "../types/Employee";
 import { GET_EMPLOYEES_PAGINATED, DELETE_EMPLOYEE } from "../graphql/employee.queries";
 import { useAuth } from "../context/AuthContext";
@@ -30,22 +29,31 @@ function EmployeeList() {
   const [detailVisible, setDetailVisible] = useState(false);
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(10);
-  const [classFilter, setClassFilter] = useState("");
-  const [nameFilter, setNameFilter] = useState("");
+  const [sortField, setSortField] = useState<string>("name");
+  const [sortOrder, setSortOrder] = useState<"ASC" | "DESC">("ASC");
+  const [flaggedIds, setFlaggedIds] = useState<Set<number>>(new Set());
   const menuRefs = useRef<{ [key: number]: Menu | null }>({});
   const { isAdmin } = useAuth();
+
+  useEffect(() => {
+    const stored = localStorage.getItem("flaggedEmployees");
+    if (stored) {
+      try {
+        const ids = JSON.parse(stored);
+        setFlaggedIds(new Set(ids));
+      } catch (e) {
+        console.error("Failed to load flagged employees", e);
+      }
+    }
+  }, []);
 
   const { data, loading, refetch } = useQuery<EmployeesPaginatedData>(GET_EMPLOYEES_PAGINATED, {
     variables: {
       pagination: {
         limit: rows,
         offset: first,
-        sortBy: "name",
-        sortOrder: "ASC",
-      },
-      filter: {
-        ...(nameFilter && { name: nameFilter }),
-        ...(classFilter && { class: classFilter }),
+        sortBy: sortField,
+        sortOrder: sortOrder,
       },
     },
     fetchPolicy: "cache-and-network",
@@ -84,12 +92,42 @@ function EmployeeList() {
     }
   };
 
+  const handleFlag = (employeeId: number) => {
+    const newFlaggedIds = new Set(flaggedIds);
+    if (newFlaggedIds.has(employeeId)) {
+      newFlaggedIds.delete(employeeId);
+    } else {
+      newFlaggedIds.add(employeeId);
+    }
+    setFlaggedIds(newFlaggedIds);
+    localStorage.setItem("flaggedEmployees", JSON.stringify(Array.from(newFlaggedIds)));
+  };
+
+  const handleEdit = (employee: Employee) => {
+    setSelectedEmployee(employee);
+    setDetailVisible(true);
+  };
+
+  const onSort = (event: any) => {
+    const field = event.sortField;
+    const order = event.sortOrder === 1 ? "ASC" : "DESC";
+    setSortField(field);
+    setSortOrder(order);
+    setFirst(0);
+  };
+
   const getActionMenuItems = (employee: Employee) => {
+    const isFlagged = flaggedIds.has(employee.id);
     const items = [
       {
         label: "View Details",
         icon: "pi pi-eye",
         command: () => openDetail(employee),
+      },
+      {
+        label: isFlagged ? "Unflag" : "Flag",
+        icon: isFlagged ? "pi pi-flag-fill" : "pi pi-flag",
+        command: () => handleFlag(employee.id),
       },
     ];
 
@@ -98,9 +136,7 @@ function EmployeeList() {
         {
           label: "Edit",
           icon: "pi pi-pencil",
-          command: () => {
-            console.log("Edit employee:", employee.name);
-          },
+          command: () => handleEdit(employee),
         },
         {
           label: "Delete",
@@ -126,6 +162,16 @@ function EmployeeList() {
     return <span>{rowData.subjects.join(", ")}</span>;
   };
 
+  const nameBodyTemplate = (rowData: Employee) => {
+    const isFlagged = flaggedIds.has(rowData.id);
+    return (
+      <span>
+        {isFlagged && <i className="pi pi-flag-fill" style={{ color: "#ff6b6b", marginRight: "8px" }}></i>}
+        {rowData.name}
+      </span>
+    );
+  };
+
   const onPage = (event: { first: number; rows: number }) => {
     setFirst(event.first);
     setRows(event.rows);
@@ -142,13 +188,16 @@ function EmployeeList() {
         rows={rows}
         totalRecords={totalRecords}
         onPage={onPage}
+        onSort={onSort}
+        sortField={sortField}
+        sortOrder={sortOrder === "ASC" ? 1 : -1}
         onRowClick={(e) => openDetail(e.data as Employee)}
         className="employee-table"
         selectionMode="single"
         dataKey="id"
       >
         <Column field="id" header="ID" sortable style={{ width: "8%" }} />
-        <Column field="name" header="Name" sortable style={{ width: "20%" }} />
+        <Column field="name" header="Name" sortable body={nameBodyTemplate} style={{ width: "20%" }} />
         <Column field="age" header="Age" sortable style={{ width: "10%" }} />
         <Column field="class" header="Class" sortable style={{ width: "12%" }} />
         <Column body={subjectsBodyTemplate} header="Subjects" style={{ width: "35%" }} />
@@ -164,47 +213,53 @@ function EmployeeList() {
 
     return (
       <div className="tile-grid">
-        {employees.map((employee) => (
-          <Card key={employee.id} className="employee-tile">
-            <div className="tile-content" onClick={() => openDetail(employee)}>
-              <div className="tile-header">
-                <h3>{employee.name}</h3>
-                <div className="tile-actions" onClick={(e) => e.stopPropagation()}>
-                  <Menu
-                    model={getActionMenuItems(employee)}
-                    popup
-                    ref={(el) => (menuRefs.current[employee.id] = el)}
-                    id={`tile-menu-${employee.id}`}
-                  />
-                  <Button
-                    icon="pi pi-ellipsis-v"
-                    rounded
-                    text
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      menuRefs.current[employee.id]?.toggle(e);
-                    }}
-                    aria-label="Actions"
-                  />
+        {employees.map((employee) => {
+          const isFlagged = flaggedIds.has(employee.id);
+          return (
+            <Card key={employee.id} className={`employee-tile ${isFlagged ? "flagged" : ""}`}>
+              <div className="tile-content" onClick={() => openDetail(employee)}>
+                <div className="tile-header">
+                  <h3>
+                    {isFlagged && <i className="pi pi-flag-fill" style={{ color: "#ff6b6b", marginRight: "8px" }}></i>}
+                    {employee.name}
+                  </h3>
+                  <div className="tile-actions" onClick={(e) => e.stopPropagation()}>
+                    <Menu
+                      model={getActionMenuItems(employee)}
+                      popup
+                      ref={(el) => (menuRefs.current[employee.id] = el)}
+                      id={`tile-menu-${employee.id}`}
+                    />
+                    <Button
+                      icon="pi pi-ellipsis-v"
+                      rounded
+                      text
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        menuRefs.current[employee.id]?.toggle(e);
+                      }}
+                      aria-label="Actions"
+                    />
+                  </div>
+                </div>
+                <div className="tile-info">
+                  <div className="tile-info-item">
+                    <i className="pi pi-calendar"></i>
+                    <span>Age: {employee.age}</span>
+                  </div>
+                  <div className="tile-info-item">
+                    <i className="pi pi-book"></i>
+                    <span>Class: {employee.class}</span>
+                  </div>
+                  <div className="tile-info-item">
+                    <i className="pi pi-list"></i>
+                    <span>{employee.subjects.length} subjects</span>
+                  </div>
                 </div>
               </div>
-              <div className="tile-info">
-                <div className="tile-info-item">
-                  <i className="pi pi-calendar"></i>
-                  <span>Age: {employee.age}</span>
-                </div>
-                <div className="tile-info-item">
-                  <i className="pi pi-book"></i>
-                  <span>Class: {employee.class}</span>
-                </div>
-                <div className="tile-info-item">
-                  <i className="pi pi-list"></i>
-                  <span>{employee.subjects.length} subjects</span>
-                </div>
-              </div>
-            </div>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
       </div>
     );
   };
@@ -214,15 +269,6 @@ function EmployeeList() {
       <div className="employee-list-header">
         <h1>Employees</h1>
         <div className="header-controls">
-          <div className="filters">
-            <InputText value={nameFilter} onChange={(e) => setNameFilter(e.target.value)} placeholder="Search by name..." className="filter-input" />
-            <InputText
-              value={classFilter}
-              onChange={(e) => setClassFilter(e.target.value)}
-              placeholder="Filter by class..."
-              className="filter-input"
-            />
-          </div>
           <Button
             icon={viewMode === "grid" ? "pi pi-th-large" : "pi pi-table"}
             label={viewMode === "grid" ? "Tile View" : "Grid View"}
@@ -234,7 +280,7 @@ function EmployeeList() {
 
       <div className="employee-list-content">{viewMode === "grid" ? renderGridView() : renderTileView()}</div>
 
-      <EmployeeDetail employee={selectedEmployee} visible={detailVisible} onHide={closeDetail} onUpdate={() => refetch()} />
+      <EmployeeDetail employee={selectedEmployee} visible={detailVisible} onHide={closeDetail} onUpdate={() => refetch()} isAdmin={isAdmin} />
     </div>
   );
 }
