@@ -3,16 +3,13 @@ import { Menubar } from "primereact/menubar";
 import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import { MenuItem } from "primereact/menuitem";
-import { Avatar } from "primereact/avatar";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import "./Navbar.css";
 
 function Navbar() {
   const [visible, setVisible] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
 
   const toggleSubmenu = (menu: string) => {
     setOpenSubmenu(openSubmenu === menu ? null : menu);
@@ -113,31 +110,8 @@ function Navbar() {
     </div>
   );
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   const end = (
     <div className="navbar-end">
-      {user && (
-        <div className="user-info">
-          <Avatar icon="pi pi-user" size="normal" shape="circle" className="user-avatar" />
-          <div className="user-details">
-            <span className="username">{user.username}</span>
-            <span className="user-role">{user.role}</span>
-          </div>
-          <Button
-            icon="pi pi-sign-out"
-            onClick={handleLogout}
-            className="logout-btn"
-            text
-            aria-label="Logout"
-            tooltip="Logout"
-            tooltipOptions={{ position: "bottom" }}
-          />
-        </div>
-      )}
       <Button icon="pi pi-bars" onClick={() => setVisible(true)} className="hamburger-btn" text aria-label="Menu" />
     </div>
   );

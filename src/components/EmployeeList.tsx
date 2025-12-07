@@ -6,7 +6,6 @@ import { Card } from "primereact/card";
 import { Menu } from "primereact/menu";
 import { Employee } from "../types/Employee";
 import { fetchEmployees } from "../services/employeeService";
-import { useAuth } from "../context/AuthContext";
 import EmployeeDetail from "./EmployeeDetail";
 import "./EmployeeList.css";
 
@@ -24,7 +23,6 @@ function EmployeeList() {
   const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const menuRefs = useRef<{ [key: number]: Menu | null }>({});
-  const { isAdmin } = useAuth();
 
   useEffect(() => {
     const stored = localStorage.getItem("flaggedEmployees");
@@ -138,22 +136,17 @@ function EmployeeList() {
         icon: isFlagged ? "pi pi-flag-fill" : "pi pi-flag",
         command: () => handleFlag(employee.id),
       },
+      {
+        label: "Edit",
+        icon: "pi pi-pencil",
+        command: () => handleEdit(employee),
+      },
+      {
+        label: "Delete",
+        icon: "pi pi-trash",
+        command: () => handleDelete(employee.id),
+      },
     ];
-
-    if (isAdmin) {
-      items.push(
-        {
-          label: "Edit",
-          icon: "pi pi-pencil",
-          command: () => handleEdit(employee),
-        },
-        {
-          label: "Delete",
-          icon: "pi pi-trash",
-          command: () => handleDelete(employee.id),
-        }
-      );
-    }
 
     return items;
   };
